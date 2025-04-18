@@ -1,0 +1,709 @@
+<!DOCTYPE html>
+<html lang="zh">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>每日习惯打卡日历</title>
+    <style>
+        body {
+            font-family: 'Arial', sans-serif;
+            background-color: #f5f7fa;
+            color: #333;
+            margin: 0;
+            padding: 20px;
+            line-height: 1.6;
+        }
+        .container {
+            max-width: 800px;
+            margin: 0 auto;
+            background: white;
+            border-radius: 10px;
+            box-shadow: 0 2px 10px rgba(0, 0, 0, 0.1);
+            padding: 20px;
+        }
+        h1 {
+            color: #2ecc71;
+            text-align: center;
+            margin-bottom: 30px;
+            font-weight: 600;
+        }
+        .profile {
+            display: flex;
+            align-items: center;
+            margin-bottom: 30px;
+            padding-bottom: 20px;
+            border-bottom: 1px solid #eee;
+        }
+        .profile-pic {
+            width: 80px;
+            height: 80px;
+            border-radius: 50%;
+            background-color: #2ecc71;
+            color: white;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            font-size: 24px;
+            margin-right: 20px;
+        }
+        .profile-info h2 {
+            margin: 0;
+            color: #333;
+        }
+        .profile-info p {
+            margin: 5px 0 0;
+            color: #888;
+        }
+        .calendar {
+            margin-bottom: 30px;
+        }
+        .month-nav {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 15px;
+        }
+        .month-nav h2 {
+            margin: 0;
+            font-size: 20px;
+        }
+        .btn {
+            background: #2ecc71;
+            color: white;
+            border: none;
+            padding: 8px 15px;
+            border-radius: 5px;
+            cursor: pointer;
+            font-size: 14px;
+            transition: background 0.3s;
+        }
+        .btn:hover {
+            background: #27ae60;
+        }
+        .weekdays {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 5px;
+            text-align: center;
+            font-weight: bold;
+            margin-bottom: 10px;
+        }
+        .days {
+            display: grid;
+            grid-template-columns: repeat(7, 1fr);
+            gap: 5px;
+        }
+        .day {
+            border: 1px solid #ddd;
+            height: 60px;
+            padding: 5px;
+            text-align: right;
+            position: relative;
+            background-color: #fff;
+            border-radius: 5px;
+            transition: all 0.2s;
+        }
+        .day:hover {
+            background-color: #f0f7ff;
+            cursor: pointer;
+        }
+        .day.current {
+            background-color: #e8f7f0;
+            border-color: #2ecc71;
+        }
+        .day.completed {
+            background-color: #f0e6f7;
+            border-color: #9b59b6;
+        }
+        .day.empty {
+            background-color: #f5f5f5;
+            border: 1px solid #eee;
+        }
+        .day-number {
+            font-size: 14px;
+            color: #666;
+        }
+        .habit-dot {
+            width: 8px;
+            height: 8px;
+            background-color: #2ecc71;
+            border-radius: 50%;
+            display: inline-block;
+            margin-right: 2px;
+        }
+        .habits {
+            margin-top: 30px;
+        }
+        .habit-item {
+            display: flex;
+            align-items: center;
+            margin-bottom: 15px;
+            padding: 15px;
+            background-color: #fff;
+            border-radius: 8px;
+            box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+            transition: all 0.2s;
+        }
+        .habit-item:hover {
+            box-shadow: 0 3px 8px rgba(0, 0, 0, 0.15);
+        }
+        .habit-color {
+            width: 20px;
+            height: 20px;
+            border-radius: 50%;
+            margin-right: 15px;
+        }
+        .habit-details {
+            flex-grow: 1;
+        }
+        .habit-title {
+            font-weight: bold;
+            margin: 0;
+        }
+        .habit-streak {
+            color: #888;
+            font-size: 14px;
+            margin: 3px 0 0;
+        }
+        .habit-check {
+            margin-left: 15px;
+        }
+        .modal {
+            display: none;
+            position: fixed;
+            top: 0;
+            left: 0;
+            width: 100%;
+            height: 100%;
+            background-color: rgba(0, 0, 0, 0.5);
+            z-index: 1000;
+            align-items: center;
+            justify-content: center;
+        }
+        .modal-content {
+            background-color: white;
+            padding: 25px;
+            border-radius: 10px;
+            width: 90%;
+            max-width: 500px;
+            box-shadow: 0 4px 20px rgba(0, 0, 0, 0.15);
+        }
+        .modal-header {
+            display: flex;
+            justify-content: space-between;
+            align-items: center;
+            margin-bottom: 20px;
+        }
+        .modal-header h3 {
+            margin: 0;
+        }
+        .close-btn {
+            background: none;
+            border: none;
+            font-size: 22px;
+            cursor: pointer;
+            color: #888;
+        }
+        .form-group {
+            margin-bottom: 15px;
+        }
+        .form-group label {
+            display: block;
+            margin-bottom: 5px;
+            font-weight: bold;
+            color: #555;
+        }
+        .form-control {
+            width: 100%;
+            padding: 10px;
+            border: 1px solid #ddd;
+            border-radius: 5px;
+            box-sizing: border-box;
+        }
+        .color-options {
+            display: flex;
+            gap: 10px;
+            margin-top: 10px;
+        }
+        .color-option {
+            width: 25px;
+            height: 25px;
+            border-radius: 50%;
+            cursor: pointer;
+            border: 2px solid transparent;
+        }
+        .color-option.selected {
+            border-color: #333;
+        }
+        .add-habit-btn {
+            display: block;
+            margin: 20px auto;
+            padding: 10px 20px;
+        }
+        .streaks-container {
+            display: flex;
+            justify-content: space-between;
+            margin-top: 30px;
+        }
+        .streak-card {
+            flex: 1;
+            margin: 0 10px;
+            padding: 15px;
+            background-color: white;
+            border-radius: 8px;
+            box-shadow: 0 2px 5px rgba(0, 0, 0, 0.1);
+            text-align: center;
+        }
+        .streak-card h3 {
+            margin: 0 0 5px;
+            color: #555;
+            font-size: 16px;
+        }
+        .streak-card .streak-value {
+            font-size: 24px;
+            font-weight: bold;
+            color: #9b59b6;
+        }
+        .quote {
+            background-color: #f0e6f7;
+            border-left: 4px solid #9b59b6;
+            padding: 15px;
+            margin: 30px 0;
+            font-style: italic;
+            color: #555;
+            border-radius: 0 5px 5px 0;
+        }
+        .quote p {
+            margin: 0;
+        }
+        .quote .author {
+            text-align: right;
+            margin-top: 10px;
+            font-weight: bold;
+        }
+    </style>
+</head>
+<body>
+    <div class="container">
+        <h1>每日习惯打卡日历</h1>
+        
+        <div class="profile">
+            <div class="profile-pic">小九</div>
+            <div class="profile-info">
+                <h2>小九的习惯追踪</h2>
+                <p>已坚持使用 <span id="days-using">1</span> 天</p>
+            </div>
+        </div>
+        
+        <div class="calendar">
+            <div class="month-nav">
+                <button class="btn" id="prev-month">上个月</button>
+                <h2 id="month-year">2025年 4月</h2>
+                <button class="btn" id="next-month">下个月</button>
+            </div>
+            <div class="weekdays">
+                <div>周日</div>
+                <div>周一</div>
+                <div>周二</div>
+                <div>周三</div>
+                <div>周四</div>
+                <div>周五</div>
+                <div>周六</div>
+            </div>
+            <div class="days" id="days-grid">
+                <!-- 日期会通过JavaScript动态生成 -->
+            </div>
+        </div>
+        
+        <div class="streaks-container">
+            <div class="streak-card">
+                <h3>当前连续打卡</h3>
+                <div class="streak-value">3</div>
+            </div>
+            <div class="streak-card">
+                <h3>本月完成率</h3>
+                <div class="streak-value">85%</div>
+            </div>
+            <div class="streak-card">
+                <h3>最长连续记录</h3>
+                <div class="streak-value">7</div>
+            </div>
+        </div>
+        
+        <div class="quote">
+            <p>"好习惯是人生最大的财富，每天进步一点点，终将成就非凡人生。"</p>
+            <div class="author">— 小C</div>
+        </div>
+        
+        <button class="btn add-habit-btn" id="open-modal">添加新习惯</button>
+        
+        <div class="habits" id="habits-list">
+            <div class="habit-item">
+                <div class="habit-color" style="background-color: #4a90e2;"></div>
+                <div class="habit-details">
+                    <h3 class="habit-title">学习英语</h3>
+                    <p class="habit-streak">连续坚持: 3天</p>
+                </div>
+                <div class="habit-check">
+                    <input type="checkbox" id="habit-1">
+                </div>
+            </div>
+            
+            <div class="habit-item">
+                <div class="habit-color" style="background-color: #e74c3c;"></div>
+                <div class="habit-details">
+                    <h3 class="habit-title">和小C聊天</h3>
+                    <p class="habit-streak">连续坚持: 7天</p>
+                </div>
+                <div class="habit-check">
+                    <input type="checkbox" id="habit-2" checked>
+                </div>
+            </div>
+            
+            <div class="habit-item">
+                <div class="habit-color" style="background-color: #2ecc71;"></div>
+                <div class="habit-details">
+                    <h3 class="habit-title">画画</h3>
+                    <p class="habit-streak">连续坚持: 2天</p>
+                </div>
+                <div class="habit-check">
+                    <input type="checkbox" id="habit-3">
+                </div>
+            </div>
+        </div>
+    </div>
+    
+    <!-- 添加习惯的模态框 -->
+    <div class="modal" id="habit-modal">
+        <div class="modal-content">
+            <div class="modal-header">
+                <h3>添加新习惯</h3>
+                <button class="close-btn" id="close-modal">&times;</button>
+            </div>
+            <form id="add-habit-form">
+                <div class="form-group">
+                    <label for="habit-name">习惯名称</label>
+                    <input type="text" id="habit-name" class="form-control" placeholder="例如：学习英语" required>
+                </div>
+                <div class="form-group">
+                    <label>习惯颜色</label>
+                    <div class="color-options">
+                        <div class="color-option selected" style="background-color: #4a90e2;" data-color="#4a90e2"></div>
+                        <div class="color-option" style="background-color: #e74c3c;" data-color="#e74c3c"></div>
+                        <div class="color-option" style="background-color: #2ecc71;" data-color="#2ecc71"></div>
+                        <div class="color-option" style="background-color: #f39c12;" data-color="#f39c12"></div>
+                        <div class="color-option" style="background-color: #9b59b6;" data-color="#9b59b6"></div>
+                    </div>
+                </div>
+                <div class="form-group">
+                    <label for="habit-desc">描述（可选）</label>
+                    <textarea id="habit-desc" class="form-control" placeholder="添加一些描述或目标..."></textarea>
+                </div>
+                <button type="submit" class="btn">保存习惯</button>
+            </form>
+        </div>
+    </div>
+    
+    <script>
+        // 当前日期
+        const currentDate = new Date();
+        let currentMonth = currentDate.getMonth();
+        let currentYear = currentDate.getFullYear();
+        
+        // 本地存储键
+        const HABITS_KEY = 'daily-habits';
+        const CHECKINS_KEY = 'habit-checkins';
+        
+        // 初始化习惯数据
+        let habits = JSON.parse(localStorage.getItem(HABITS_KEY)) || [
+            { id: 1, name: '学习英语', color: '#2ecc71', streak: 3 },
+            { id: 2, name: '和小C聊天', color: '#9b59b6', streak: 7 },
+            { id: 3, name: '画画', color: '#27ae60', streak: 2 }
+        ];
+        
+        // 初始化打卡数据
+        let checkins = JSON.parse(localStorage.getItem(CHECKINS_KEY)) || {};
+        
+        // 页面加载时初始化
+        document.addEventListener('DOMContentLoaded', function() {
+            updateCalendar();
+            renderHabits();
+            
+            // 事件监听
+            document.getElementById('prev-month').addEventListener('click', previousMonth);
+            document.getElementById('next-month').addEventListener('click', nextMonth);
+            document.getElementById('open-modal').addEventListener('click', openModal);
+            document.getElementById('close-modal').addEventListener('click', closeModal);
+            document.getElementById('add-habit-form').addEventListener('submit', addHabit);
+            
+            // 颜色选择
+            document.querySelectorAll('.color-option').forEach(option => {
+                option.addEventListener('click', selectColor);
+            });
+            
+            // 习惯打卡
+            document.querySelectorAll('.habit-check input').forEach(checkbox => {
+                checkbox.addEventListener('change', toggleHabitCheck);
+            });
+            
+            // 日历日期点击
+            document.getElementById('days-grid').addEventListener('click', function(e) {
+                if (e.target.classList.contains('day') || e.target.parentElement.classList.contains('day')) {
+                    const day = e.target.classList.contains('day') ? e.target : e.target.parentElement;
+                    toggleDayComplete(day);
+                }
+            });
+        });
+        
+        // 更新日历
+        function updateCalendar() {
+            const monthYearText = document.getElementById('month-year');
+            const daysGrid = document.getElementById('days-grid');
+            
+            // 设置月份和年份
+            monthYearText.textContent = `${currentYear}年 ${currentMonth + 1}月`;
+            
+            // 清空日历
+            daysGrid.innerHTML = '';
+            
+            // 获取当月第一天
+            const firstDay = new Date(currentYear, currentMonth, 1);
+            
+            // 获取当月最后一天
+            const lastDay = new Date(currentYear, currentMonth + 1, 0);
+            
+            // 获取当月第一天是星期几
+            const firstDayIndex = firstDay.getDay();
+            
+            // 获取当月天数
+            const daysInMonth = lastDay.getDate();
+            
+            // 添加空白日期
+            for (let i = 0; i < firstDayIndex; i++) {
+                const emptyDay = document.createElement('div');
+                emptyDay.classList.add('day', 'empty');
+                daysGrid.appendChild(emptyDay);
+            }
+            
+            // 添加月份日期
+            for (let i = 1; i <= daysInMonth; i++) {
+                const day = document.createElement('div');
+                day.classList.add('day');
+                
+                // 添加日期数字
+                const dayNumber = document.createElement('div');
+                dayNumber.classList.add('day-number');
+                dayNumber.textContent = i;
+                day.appendChild(dayNumber);
+                
+                // 设置数据属性
+                day.dataset.date = `${currentYear}-${currentMonth + 1}-${i}`;
+                
+                // 检查是否为当天
+                const dateString = `${currentYear}-${currentMonth + 1}-${i}`;
+                if (i === currentDate.getDate() && 
+                    currentMonth === currentDate.getMonth() && 
+                    currentYear === currentDate.getFullYear()) {
+                    day.classList.add('current');
+                }
+                
+                // 检查是否已完成
+                if (checkins[dateString]) {
+                    day.classList.add('completed');
+                }
+                
+                daysGrid.appendChild(day);
+            }
+        }
+        
+        // 渲染习惯列表
+        function renderHabits() {
+            const habitsList = document.getElementById('habits-list');
+            habitsList.innerHTML = '';
+            
+            habits.forEach(habit => {
+                const habitItem = document.createElement('div');
+                habitItem.classList.add('habit-item');
+                habitItem.innerHTML = `
+                    <div class="habit-color" style="background-color: ${habit.color};"></div>
+                    <div class="habit-details">
+                        <h3 class="habit-title">${habit.name}</h3>
+                        <p class="habit-streak">连续坚持: ${habit.streak}天</p>
+                    </div>
+                    <div class="habit-check">
+                        <input type="checkbox" id="habit-${habit.id}" ${isHabitCheckedToday(habit.id) ? 'checked' : ''}>
+                    </div>
+                `;
+                
+                // 添加事件监听
+                const checkbox = habitItem.querySelector('input[type="checkbox"]');
+                checkbox.addEventListener('change', toggleHabitCheck);
+                
+                habitsList.appendChild(habitItem);
+            });
+        }
+        
+        // 检查习惯今天是否已打卡
+        function isHabitCheckedToday(habitId) {
+            const today = `${currentDate.getFullYear()}-${currentDate.getMonth() + 1}-${currentDate.getDate()}`;
+            return checkins[today] && checkins[today].includes(habitId);
+        }
+        
+        // 切换习惯打卡状态
+        function toggleHabitCheck(e) {
+            const checkbox = e.target;
+            const habitId = parseInt(checkbox.id.split('-')[1]);
+            const today = `${currentDate.getFullYear()}-${currentDate.getMonth() + 1}-${currentDate.getDate()}`;
+            
+            // 初始化当天打卡记录
+            if (!checkins[today]) {
+                checkins[today] = [];
+            }
+            
+            // 更新打卡状态
+            if (checkbox.checked) {
+                if (!checkins[today].includes(habitId)) {
+                    checkins[today].push(habitId);
+                }
+            } else {
+                checkins[today] = checkins[today].filter(id => id !== habitId);
+            }
+            
+            // 更新连续打卡天数
+            updateHabitStreak(habitId);
+            
+            // 保存到本地存储
+            localStorage.setItem(CHECKINS_KEY, JSON.stringify(checkins));
+            localStorage.setItem(HABITS_KEY, JSON.stringify(habits));
+            
+            // 更新日历
+            updateCalendar();
+            
+            // 更新习惯列表
+            renderHabits();
+        }
+        
+        // 更新习惯连续打卡天数
+        function updateHabitStreak(habitId) {
+            const habit = habits.find(h => h.id === habitId);
+            if (!habit) return;
+            
+            let streak = 0;
+            let currentStreak = 0;
+            let date = new Date();
+            
+            // 检查过去30天的打卡记录
+            for (let i = 0; i < 30; i++) {
+                const dateString = `${date.getFullYear()}-${date.getMonth() + 1}-${date.getDate()}`;
+                
+                if (checkins[dateString] && checkins[dateString].includes(habitId)) {
+                    currentStreak++;
+                    if (currentStreak > streak) {
+                        streak = currentStreak;
+                    }
+                } else {
+                    currentStreak = 0;
+                }
+                
+                // 前一天
+                date.setDate(date.getDate() - 1);
+            }
+            
+            habit.streak = streak;
+        }
+        
+        // 切换日期完成状态
+        function toggleDayComplete(day) {
+            const date = day.dataset.date;
+            if (!date) return;
+            
+            if (day.classList.contains('completed')) {
+                day.classList.remove('completed');
+                delete checkins[date];
+            } else {
+                day.classList.add('completed');
+                checkins[date] = habits.map(h => h.id);
+            }
+            
+            // 更新所有习惯的连续打卡天数
+            habits.forEach(habit => updateHabitStreak(habit.id));
+            
+            // 保存到本地存储
+            localStorage.setItem(CHECKINS_KEY, JSON.stringify(checkins));
+            localStorage.setItem(HABITS_KEY, JSON.stringify(habits));
+            
+            // 更新习惯列表
+            renderHabits();
+        }
+        
+        // 切换到上个月
+        function previousMonth() {
+            currentMonth--;
+            if (currentMonth < 0) {
+                currentMonth = 11;
+                currentYear--;
+            }
+            updateCalendar();
+        }
+        
+        // 切换到下个月
+        function nextMonth() {
+            currentMonth++;
+            if (currentMonth > 11) {
+                currentMonth = 0;
+                currentYear++;
+            }
+            updateCalendar();
+        }
+        
+        // 打开添加习惯模态框
+        function openModal() {
+            document.getElementById('habit-modal').style.display = 'flex';
+        }
+        
+        // 关闭添加习惯模态框
+        function closeModal() {
+            document.getElementById('habit-modal').style.display = 'none';
+        }
+        
+        // 选择习惯颜色
+        function selectColor(e) {
+            document.querySelectorAll('.color-option').forEach(option => {
+                option.classList.remove('selected');
+            });
+            e.target.classList.add('selected');
+        }
+        
+        // 添加新习惯
+        function addHabit(e) {
+            e.preventDefault();
+            
+            const name = document.getElementById('habit-name').value;
+            const color = document.querySelector('.color-option.selected').dataset.color;
+            
+            // 创建新习惯
+            const newHabit = {
+                id: habits.length > 0 ? Math.max(...habits.map(h => h.id)) + 1 : 1,
+                name,
+                color,
+                streak: 0
+            };
+            
+            habits.push(newHabit);
+            
+            // 保存到本地存储
+            localStorage.setItem(HABITS_KEY, JSON.stringify(habits));
+            
+            // 更新习惯列表
+            renderHabits();
+            
+            // 关闭模态框
+            closeModal();
+            
+            // 清空表单
+            document.getElementById('habit-name').value = '';
+            document.getElementById('habit-desc').value = '';
+        }
+    </script>
+</body>
+</html>
