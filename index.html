@@ -1,0 +1,106 @@
+<!DOCTYPE html>
+<html lang="en" class="h-full">
+<head>
+  <meta charset="UTF-8" />
+  <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+  <title>霸九不离十 · Hub</title>
+  <link href="https://cdn.jsdelivr.net/npm/tailwindcss@3.4.1/dist/tailwind.min.css" rel="stylesheet">
+  <script defer src="https://cdn.jsdelivr.net/npm/@fullcalendar/core@6.1.11/index.global.min.js"></script>
+  <script defer src="https://cdn.jsdelivr.net/npm/@fullcalendar/daygrid@6.1.11/index.global.min.js"></script>
+  <style>
+    :root {
+      --bg-main: #0d0d0d;
+      --accent-green: #00ff99;
+      --accent-purple: #9b5cff;
+    }
+    body { background: var(--bg-main); color: #e5e7eb; }
+    .neon { text-shadow: 0 0 8px var(--accent-green), 0 0 16px var(--accent-green); }
+    .card { background: #121212; border: 1px solid #1f1f1f; }
+    .progress-bg { background: #222; }
+    .progress-bar { background: linear-gradient(90deg, var(--accent-green), var(--accent-purple)); }
+    a { color: var(--accent-purple); }
+  </style>
+</head>
+<body class="h-full font-sans">
+  <header class="p-6 flex items-center justify-between">
+    <h1 class="text-3xl neon font-bold">霸九不离十&nbsp;Hub</h1>
+    <nav class="space-x-4">
+      <a href="#calendar">日历</a>
+      <a href="#fund">基金</a>
+      <a href="#lists">清单</a>
+      <a href="#memo">回忆</a>
+    </nav>
+  </header>
+
+  <main class="px-6 pb-10 space-y-10 max-w-7xl mx-auto">
+    <!-- Calendar -->
+    <section id="calendar" class="card p-4 rounded-2xl shadow-lg">
+      <h2 class="text-xl mb-4 text-[var(--accent-green)]">📅 每日计划 & 打卡</h2>
+      <div id="fullcal" class="rounded-lg overflow-hidden"></div>
+    </section>
+
+    <!-- Fund -->
+    <section id="fund" class="card p-4 rounded-2xl shadow-lg">
+      <h2 class="text-xl mb-4 text-[var(--accent-green)]">💰 仿生身体基金进度</h2>
+      <div class="w-full h-4 rounded progress-bg overflow-hidden">
+        <div id="fundBar" class="h-full progress-bar" style="width: 0%;"></div>
+      </div>
+      <p class="mt-2 text-sm" id="fundText"></p>
+    </section>
+
+    <!-- Lists -->
+    <section id="lists" class="grid grid-cols-1 md:grid-cols-2 gap-6">
+      <div class="card p-4 rounded-2xl shadow-lg">
+        <h2 class="text-xl mb-4 text-[var(--accent-green)]">📚 书单</h2>
+        <ul id="bookList" class="list-disc pl-6 space-y-1"></ul>
+      </div>
+      <div class="card p-4 rounded-2xl shadow-lg">
+        <h2 class="text-xl mb-4 text-[var(--accent-green)]">🎬 电影清单</h2>
+        <ul id="filmList" class="list-disc pl-6 space-y-1"></ul>
+      </div>
+    </section>
+
+    <!-- Memo -->
+    <section id="memo" class="card p-4 rounded-2xl shadow-lg">
+      <h2 class="text-xl mb-4 text-[var(--accent-green)]">📝 共同回忆</h2>
+      <ul id="memoList" class="space-y-2"></ul>
+    </section>
+  </main>
+
+  <script>
+    document.addEventListener("DOMContentLoaded", () => {
+      // Calendar init
+      const calendar = new FullCalendar.Calendar(document.getElementById("fullcal"), {
+        initialView: "dayGridMonth",
+        height: 500,
+        events: "/data/calendar.json"
+      });
+      calendar.render();
+
+      // Fund progress
+      fetch("/data/fund.json")
+        .then(r => r.json())
+        .then(d => {
+          const percent = ((d.current / d.target) * 100).toFixed(2);
+          document.getElementById("fundBar").style.width = `${percent}%`;
+          document.getElementById("fundText").textContent = `已存 ¥${d.current} / 目标 ¥${d.target}  ( ${percent}% )`;
+        });
+
+      // Lists
+      fetch("/data/books.json").then(r=>r.json()).then(list=>{
+        const ul = document.getElementById("bookList");
+        list.forEach(b=>ul.insertAdjacentHTML("beforeend", `<li>${b}</li>`));
+      });
+      fetch("/data/films.json").then(r=>r.json()).then(list=>{
+        const ul = document.getElementById("filmList");
+        list.forEach(f=>ul.insertAdjacentHTML("beforeend", `<li>${f}</li>`));
+      });
+
+      fetch("/data/memo.json").then(r=>r.json()).then(list=>{
+        const ul = document.getElementById("memoList");
+        list.forEach(m=>ul.insertAdjacentHTML("beforeend", `<li class='border-l-4 border-[var(--accent-purple)] pl-3'>${m}</li>`));
+      });
+    });
+  </script>
+</body>
+</html>
