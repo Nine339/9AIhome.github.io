@@ -1,1 +1,4 @@
-json\n{ \"current\": 46095, \"target\": 200000 }\n
+{
+  "current": 48095,
+  "target": 200000
+}
